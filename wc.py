@@ -34,6 +34,12 @@ def main(args):
             if args.c:
                 fsz = os.path.getsize(file_path)
                 r.append(fsz)
+            if args.w:
+                words = 0
+                with open(file_path, 'r') as fp:
+                    d = fp.read()
+                    words += len(d.split())
+                r.append(words)
             res.append(r)
         sys.stdout.write(get_stdout(res, files))
     except Exception as ex:
@@ -51,6 +57,11 @@ if __name__ == '__main__':
         "-l",
         help="Write the length of the line containing the most bytes (default) or characters (when -m is provided) to standard output.  When more than one file argument is specified, the longest input line\
              of all files is reported as the value of the final “total”.",
+        action="store_true"
+    )
+    parser.add_argument(
+        "-w",
+        help="The number of words in each input file is written to the standard output.",
         action="store_true"
     )
     parser.add_argument("file", help="Path to the file to be processed", nargs='+', type=str)
