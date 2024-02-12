@@ -97,3 +97,38 @@ cat test.txt | ccwc -l
     7145
 ```
 If it doesn’t, check your code, fix any bugs and try again. If it does, congratulations! You’ve done it, pat yourself on the back, job well done!
+
+
+
+# Learnings
+1. **How to take stdin as raw bytes vs string?**
+
+   The difference between `sys.stdin.buffer.read()` and `sys.stdin.read()` lies in how they handle input from standard input (stdin):
+
+    1. `sys.stdin.read()`: This function reads input from stdin as a string, assuming it's text data. It reads until it encounters an end-of-file (EOF) marker or until it reaches the specified number of bytes if provided. The input is decoded using the system default encoding, typically UTF-8.
+    
+    2. `sys.stdin.buffer.read()`: This function reads input from stdin as raw bytes. It does not perform any decoding, so it will return the input exactly as it's received from the input stream, without any interpretation or transformation.
+    
+    Here's a summary of the differences:
+    
+    - `sys.stdin.read()`: Reads input from stdin as text, decoding it using the system default encoding.
+    - `sys.stdin.buffer.read()`: Reads input from stdin as raw bytes, without decoding.
+    
+    When to use each:
+    - Use `sys.stdin.read()` when you expect input from stdin to be text data and you want to work with it as strings.
+    - Use `sys.stdin.buffer.read()` when you expect input from stdin to be binary data, such as images or other non-textual content, and you want to work with it as bytes.
+
+2. **What are locales?**
+
+   Locales are a mechanism used in computer systems to define and manage language, cultural, and regional settings. A locale typically includes information such as language, character encoding, date and time formatting conventions, currency symbols, and other cultural preferences.
+
+3. **How to use locales in python?**
+
+   We can have a standard import `locales` which provide us with functionality to interact with locales
+
+
+4. **How to set defaults when using argparse?**
+
+   `parser.set_defaults(func=default_action) is a method used to set default values for attributes of the parser.
+   When you use parser.set_defaults(func=default_action), you are specifying that the default value for the attribute func of the parser (or of a specific command-line argument) should be default_action.
+
