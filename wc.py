@@ -13,9 +13,10 @@ def get_stdout(res, files):
             total[idx] += fr[idx]
             out += f'{c} '
         out+=f'{files[i]}\n'
-    for i in range(ncols):
-        out += f'{total[i]} '
-    out += 'total\n'
+    if len(files) > 1:
+        for i in range(ncols):
+            out += f'{total[i]} '
+        out += 'total\n'
     return out
 
 def default_action(args):
@@ -26,33 +27,38 @@ def default_action(args):
 
 def main(args):
     try:
-        files = args.file if isinstance(args.file, list) else [args.file]
+        file_contents = []
+        if not sys.stdin.isatty():
+            content = sys.stdin.buffer.read() # taking in bytes
+            file_contents.append(content)
+        else:
+            for file_path in args.files:
+                if not os.path.isabs(file_path):
+                    file_path = os.path.join(os.getcwd(), file_path)
+                with open(file_path, 'rb') as fp:
+                    content = fp.read()
+            file_contents.append(content)
         res = []
-        for f in files:
+        files = []
+        for i, content in enumerate(file_contents):
             r = []
-            file_path = f
-            if not os.path.isabs(file_path):
-                file_path = os.path.join(os.getcwd(), file_path)
+            f = args.files[i] if len(args.files) > 0 else ''
+            files.append(f)
             if args.l:
-                flines = 0
-                with open(file_path, 'r') as fp:
-                    flines = len(fp.readlines())
+                flines = content.decode('utf-8').count('\n') + (not content.decode('utf-8').endswith('\n'))
                 r.append(flines)
             if args.w:
-                words = 0
-                with open(file_path, 'r') as fp:
-                    d = fp.read()
-                    words += len(d.split())
+                words = len(content.split())
                 r.append(words)
             if args.c:
-                fsz = os.path.getsize(file_path)
+                fsz = len(content)
                 r.append(fsz)
             if args.m:
                 encoding = locale.getpreferredencoding()
-                chars = 0
-                with open(file_path, encoding=encoding) as fp:
-                    for line in fp:
-                        chars += len(line)
+                try:
+                    chars = len(content.decode(encoding))
+                except:
+                    chars = len(content)
                 r.append(chars)
             res.append(r)
         sys.stdout.write(get_stdout(res, files))
@@ -84,7 +90,7 @@ if __name__ == '__main__':
              cancel out any prior usage of the -c option.",
         action="store_true"
     )
-    parser.add_argument("file", help="Path to the file to be processed", nargs='+', type=str)
+    parser.add_argument("files", help="Path to the file to be processed", nargs='*')
     parser.set_defaults(func=default_action)
     args = parser.parse_args()
     args.func(args)
